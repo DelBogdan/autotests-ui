@@ -1,4 +1,3 @@
-from playwright.sync_api import expect
 import pytest
 
 from pages.create_course_page import CreateCoursePage
@@ -7,29 +6,20 @@ from pages.courses_list_page import CoursesListPage
 
 @pytest.mark.courses
 @pytest.mark.regression
-def test_empty_courses_list(chromium_page_with_state):
-    chromium_page_with_state.goto("https://nikita-filonov.github.io/qa-automation-engineer-ui-course/#/courses")
+def test_empty_courses_list(courses_list_page: CoursesListPage):
+    courses_list_page.visit("https://nikita-filonov.github.io/qa-automation-engineer-ui-course/#/courses")
 
-    # Проверить наличие и текст заголовка "Courses"
-    courses_title = chromium_page_with_state.get_by_test_id('courses-list-toolbar-title-text')
-    expect(courses_title).to_be_visible()
-    expect(courses_title).to_have_text("Courses")
+    courses_list_page.sidebar.check_visible()
+    courses_list_page.navbar.check_visible("username")
 
-    # Проверить наличие и текст блока "There is no results"
-    courses_list_empty_title = chromium_page_with_state.get_by_test_id('courses-list-empty-view-title-text')
-    expect(courses_list_empty_title).to_be_visible()
-    expect(courses_list_empty_title).to_have_text("There is no results")
+    # Проверяет наличие и корректное отображение заголовка страницы
+    courses_list_page.check_visible_courses_title()
 
-    # Проверить наличие и видимость иконки пустого блока
-    courses_list_empty_view_icon = chromium_page_with_state.get_by_test_id('courses-list-empty-view-icon')
-    expect(courses_list_empty_view_icon).to_be_visible()
+    # Проверяет, что кнопка для создания нового курса отображается
+    courses_list_page.check_visible_create_course_button()
 
-    # Проверить наличие и текст описания блока: "Results from the load test pipeline will be displayed here"
-    courses_list_empty_view_description = chromium_page_with_state.get_by_test_id(
-        'courses-list-empty-view-description-text')
-    expect(courses_list_empty_view_description).to_be_visible()
-    expect(courses_list_empty_view_description).to_have_text(
-        "Results from the load test pipeline will be displayed here")
+    # Проверяет, что при отсутствии курсов отображается соответствующий блок с сообщением об отсутствии результатов.
+    courses_list_page.check_visible_empty_view()
 
 
 @pytest.mark.courses
