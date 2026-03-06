@@ -28,16 +28,21 @@ def initialize_browser_state(playwright: Playwright):
     context.storage_state(path=settings.browser_state_file)
 
 
-@pytest.fixture(scope="function")
-def chromium_page_with_state(initialize_browser_state, playwright: Playwright, request: SubRequest) -> Page:  # type: ignore
+@pytest.fixture(params=settings.browsers)
+def page(playwright: Playwright, request: SubRequest) -> Page:  # type: ignore
     yield from initialize_playwright_page(
         playwright,
         test_name=request.node.name,
-        storage_state=settings.browser_state_file
+        browser_type=request.param
     )
 
 
-@pytest.fixture
-def chromium_page(playwright: Playwright, request: SubRequest) -> Page: # type: ignore
-    yield from initialize_playwright_page(playwright, test_name=request.node.name)
-
+@pytest.fixture(scope="function", params=settings.browsers)
+def page_with_state(initialize_browser_state, playwright: Playwright,
+                    request: SubRequest) -> Page:  # type: ignore
+    yield from initialize_playwright_page(
+        playwright,
+        test_name=request.node.name,
+        storage_state=settings.browser_state_file,
+        browser_type=request.param
+    )
