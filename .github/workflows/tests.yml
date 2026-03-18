@@ -52,7 +52,7 @@ jobs:
         run: |
           ui-coverage-tool save-report
 
-      # Сохраняем в кэш файл coverage-history.json с новыми данными, для последующего использования в workflow
+      # Сохраняем в cache файл coverage-history.json с новыми данными, для последующего использования в workflow
       - name: Cache Coverage history
         if: always()
         uses: actions/cache/save@v5
