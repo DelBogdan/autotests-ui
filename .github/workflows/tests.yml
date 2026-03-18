@@ -38,9 +38,39 @@ jobs:
         run: |
           pytest -m regression --alluredir=allure-results --numprocesses 2  # Запускаем тесты, отмеченные как "regression", генерируем результаты для Allure
 
+      # Загружаем из кэша ранее сохраненную историю(из других workflow), и передаем в данный workflow
+      - name: Restore Coverage history
+        uses: actions/cache/restore@v5
+        with:
+          path: coverage-history.json
+          key: coverage-history-${{ github.run_id }}
+          restore-keys: |
+            coverage-history-
+
+      # Запускаем генерацию отчета ui-coverage-tool
+      - name: Generate Coverage report
+        run: |
+          ui-coverage-tool save-report
+
+      # Сохраняем в кэш файл coverage-history.json с новыми данными, для последующего использования в workflow
+      - name: Cache Coverage history
+        if: always()
+        uses: actions/cache/save@v5
+        with:
+          path: coverage-history.json
+          key: coverage-history-${{ github.run_id }}
+
+      # Сохраняем результаты отчета ui-coverage-tool как артефакт
+      - name: Upload Coverage report
+        uses: actions/upload-artifact@v7
+        if: always() # Загружаем результаты даже если тесты упали
+        with:
+          name: coverage-report # Имя файла с артефактом
+          path: coverage.html # Путь к html, куда нужно сохранить
+
       # НОВЫЙ ШАГ: Сохраняем результаты тестов как артефакт
       - name: Upload Allure results as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always() # Загружаем результаты даже если тесты упали
         with:
           name: allure-results # Имя архива с артефактом
